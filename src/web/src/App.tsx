@@ -37,6 +37,9 @@ import {
 } from "lucide-react";
 import { CompactRow, ItemCard, ItemDetailDrawer, QuickBlockModal } from "./components/ItemView.tsx";
 import { AdminGate } from "./components/AdminGate.tsx";
+import { DeploymentStatus } from "./components/DeploymentStatus.tsx";
+import { defaultFeedPreset, retainReloadData } from "./lib/deployment-status.ts";
+import { readPublicJson, type ReadMetadata } from "./lib/fetch.ts";
 import { ADMIN_AUTH_EVENT } from "./lib/auth.ts";
 import {
   guestAddBlock,
@@ -112,8 +115,9 @@ const sourceName = (id: string) => SOURCE_NAMES[id] ?? SOURCE_LABEL[id] ?? id;
 
 type Tab = "feed" | "hot" | "digest" | "me" | "rules" | "push" | "ai" | "ops";
 
-function useApi<T>(url: string | null, scope = ""): { data: T | null; loading: boolean; error: string | null; reload: () => void; update: (updater: (current: T | null) => T | null) => void } {
+function useApi<T>(url: string | null, scope = ""): { data: T | null; readMetadata: ReadMetadata | null; loading: boolean; error: string | null; reload: () => void; update: (updater: (current: T | null) => T | null) => void } {
   const [data, setData] = useState<T | null>(null);
+  const [readMetadata, setReadMetadata] = useState<ReadMetadata | null>(null);
   const [loading, setLoading] = useState(Boolean(url));
   const [error, setError] = useState<string | null>(null);
   const [nonce, setNonce] = useState(0);
@@ -140,22 +144,25 @@ function useApi<T>(url: string | null, scope = ""): { data: T | null; loading: b
           const body = await r.json().catch(() => ({})) as { error?: string };
           throw new Error(body.error ?? `${r.status} ${r.statusText}`);
         }
-        return (await r.json()) as T;
+        return await readPublicJson<T>(r);
       })
       .then((d) => {
-        if (!ac.signal.aborted) { setData(d); setLoadedKey(key); setError(null); }
+        if (!ac.signal.aborted) { setData(d.data); setReadMetadata(d.readMetadata); setLoadedKey(key); setError(null); }
       })
       .catch((e: unknown) => {
         if (ac.signal.aborted) return;
+        // Keep an already rendered response on transient same-query failures.
+        // Different queries/identities must never inherit the old response.
+        setData((current) => retainReloadData(current, loadedKey, key));
+        setReadMetadata((current) => retainReloadData(current, loadedKey, key));
         setLoadedKey(key);
-        setData(null);
         setError(String(e));
       })
       .finally(() => { if (!ac.signal.aborted) setLoading(false); });
     return () => ac.abort();
   }, [url, nonce, key]);
 
-  return { data: url && loadedKey === key ? data : null, loading: Boolean(url) && (loading || loadedKey !== key), error, reload, update };
+  return { data: url && loadedKey === key ? data : null, readMetadata: url && loadedKey === key ? readMetadata : null, loading: Boolean(url) && (loading || loadedKey !== key), error, reload, update };
 }
 
 function Toast({ message }: { message: string | null }) {
@@ -352,7 +359,7 @@ export function App() {
   const [minScore, setMinScore] = useState("all");
   const [obtain, setObtain] = useState("auto");
   const [kindFilter, setKindFilter] = useState("auto");
-  const [preset, setPreset] = useState("verified");
+  const [preset, setPreset] = useState(defaultFeedPreset);
   const [viewMode, setViewMode] = useState<"compact" | "grid2" | "grid3">(() => {
     if (typeof localStorage === "undefined") return "compact";
     const saved = localStorage.getItem("radar_view_mode");
@@ -1224,6 +1231,8 @@ export function App() {
             </button>
           </div>
         </header>
+
+        <DeploymentStatus readMetadata={tab === "digest" ? digestDetail.readMetadata : items.readMetadata} />
 
         {/* 主内容区 */}
         <main className={tab === "feed" ? "workspace-content min-w-0 flex-1" : "workspace-content min-w-0 flex-1 px-3.5 py-3.5 sm:px-6 sm:py-5"}>

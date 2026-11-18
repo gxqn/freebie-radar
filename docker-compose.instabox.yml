@@ -1,0 +1,32 @@
+services:
+  radar:
+    image: freebie-radar:20261118
+    restart: unless-stopped
+    mem_limit: 384m
+    cpus: 1.0
+    pids_limit: 128
+    ports:
+      - "127.0.0.1:8788:8788"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    env_file: [.env.production]
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "8788"
+      DATABASE_PATH: /data/radar.db
+      ENABLE_SCHEDULER: "false"
+      NODE_OPTIONS: --max-old-space-size=256
+    volumes:
+      - ./data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8788/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 120s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

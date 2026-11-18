@@ -1,12 +1,16 @@
 node_modules/
+.wrangler/
+.deploy-private/
 dist/
 data/
 logs/
 .env
 .env.local
+.env.production
 *.log
 .DS_Store
 .impeccable/
+.pnpm-store
 
 # 一次性探针产物
 docs/dom.html

@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { createForegroundTaskPoller } from "../lib/deployment-status.ts";
+import { aiReviewBlockedReason, readBackfillResult } from "../lib/ai-actions.ts";
 import {
   Activity,
   AlertTriangle,
@@ -110,6 +112,7 @@ export function AiPanel({
   const [testing, setTesting] = useState(false);
   const [test, setTest] = useState<TestResult | null>(null);
   const [backfilling, setBackfilling] = useState(false);
+  const [backfillError, setBackfillError] = useState<string | null>(null);
   const [reclassifying, setReclassifying] = useState(false);
   const [deduping, setDeduping] = useState(false);
   const [dedupResult, setDedupResult] = useState<{ scanned: number; merged: number; clusters: number; skippedReason?: string } | null>(null);
@@ -171,27 +174,35 @@ export function AiPanel({
   const activeJobs = st?.telemetry?.active ?? [];
   const isLiveActive = Boolean(backfilling || testing || st?.queue?.running || activeJobs.length > 0);
 
-  // 有任务运行时 750ms 高频刷新进度与实时判定流；空闲时 5s 静默同步后台采集结果
+  // Only observe active work in the foreground; idle admin tabs must let the VM sleep.
   useEffect(() => {
-    if (!data) return;
+    if (!data || !isLiveActive) return;
     let alive = true;
-    const poll = async () => {
+    const controller = createForegroundTaskPoller(async () => {
       try {
         const r = await fetch("/api/ai/live");
-        if (!r.ok || !alive) return;
+        if (!alive) return;
+        if (!r.ok) { alive = false; onNotify?.(`AI 进度查询失败（${r.status}），已停止自动查询`); return; }
         const j = (await r.json()) as { stats?: AiStats };
         if (j.stats && alive) setLiveStats(j.stats);
       } catch {
-        /* ignore */
+        if (alive) onNotify?.("AI 进度查询超时或断网，已停止自动查询");
+        alive = false;
       }
+    });
+    const poll = () => controller.poll(alive && isLiveActive, document.visibilityState === "visible");
+    void poll();
+    const timer = window.setInterval(() => void poll(), 5000);
+    const visibility = () => {
+      if (document.visibilityState !== "visible") { void poll(); window.clearInterval(timer); }
     };
-    if (isLiveActive) void poll();
-    const timer = window.setInterval(() => void poll(), isLiveActive ? 750 : 5000);
+    document.addEventListener("visibilitychange", visibility);
     return () => {
       alive = false;
       window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", visibility);
     };
-  }, [Boolean(data), isLiveActive]);
+  }, [data, isLiveActive]);
 
   // 活动任务计时器：每秒平滑更新已运行秒数
   useEffect(() => {
@@ -273,15 +284,21 @@ export function AiPanel({
   }
 
   async function runBackfill() {
+    if (backfillBlocked) { setBackfillError(backfillBlocked); return; }
     setBackfilling(true);
     setBackfill(null);
+    setBackfillError(null);
     try {
       const r = await fetch("/api/ai/backfill", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ limit: backfillLimit, mode: backfillMode }),
       });
-      setBackfill((await r.json()) as typeof backfill);
+      setBackfill(await readBackfillResult(r));
+      reload();
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : "审核请求失败";
+      setBackfillError(message + (message.includes("后台") ? "" : "；若连接超时，任务可能仍在后台执行，请查看实时审核台，勿重复提交。"));
       reload();
     } finally {
       setBackfilling(false);
@@ -335,6 +352,7 @@ export function AiPanel({
   };
 
   const canTest = Boolean(form.baseUrl.trim() && form.model.trim());
+  const backfillBlocked = aiReviewBlockedReason(s, backfilling || activeJobs.some(job => job.stage === "backfill"));
 
   return (
     <div className="space-y-4">
@@ -411,7 +429,8 @@ export function AiPanel({
             <button
               type="button"
               onClick={runBackfill}
-              disabled={backfilling || !s.ready}
+              disabled={Boolean(backfillBlocked)}
+              title={backfillBlocked ?? undefined}
               className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-1 text-[12px] font-medium text-white hover:bg-brand-hover disabled:opacity-50"
             >
               {backfilling ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
@@ -473,6 +492,8 @@ export function AiPanel({
           </div>
         )}
 
+        {!s.enabled && <p role="status" className="text-[12px] text-alert">{aiReviewBlockedReason(s, false)}</p>}
+        {backfillError && <p role="alert" className="rounded-lg border border-red-200 p-3 text-[12.5px] text-red-700">{backfillError}</p>}
         {backfill && (
           <div className="rounded-lg border border-ink-200 bg-surface p-3 text-[12.5px] text-ink-700">
             执行完成（{backfill.mode ?? "pending"}）：扫描 {backfill.scanned} 条，判定 {backfill.reviewed} 条（通过{" "}

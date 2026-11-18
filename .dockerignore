@@ -3,6 +3,11 @@ dist
 data
 .env
 .env.local
+.env.production
+.wrangler
+.deploy-private
+.gateway.env
+gateway-state
 *.log
 docs/*.png
 docs/*.html

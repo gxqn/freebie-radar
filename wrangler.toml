@@ -1,0 +1,19 @@
+name = "freebie-radar-scheduler"
+main = "deploy/cloudflare/edge.mjs"
+compatibility_date = "2026-11-18"
+workers_dev = false
+
+[triggers]
+# Hourly collection only when management metadata permits the runtime budget.
+# Public snapshot reads never wake the VM; no heartbeat.
+crons = ["0 * * * *"]
+
+[vars]
+INSTABOX_MACHINE_ID = "m_agq45h3wp7n5v4v55jyrrxgwky"
+
+[[kv_namespaces]]
+binding = "FREEBIE_PUBLIC_SNAPSHOTS"
+id = "a3105c2b2dc94fbc9c5f59ecbbbf390b"
+
+# VM_BASE_URL, VM_PORT_TOKEN, GATEWAY_SECRET, SNAPSHOT_SECRET and
+# INSTABOX_API_KEY are server-only Cloudflare Secrets.

@@ -2,6 +2,8 @@
  * 管理端凭据：只存在 sessionStorage，关掉标签页就没了。
  * 用全局 fetch 包装统一带上 Authorization，避免每个调用点都要改。
  */
+import { boundedFetch } from "./fetch.ts";
+
 const KEY = "radar-admin-token";
 
 export function getToken(): string {
@@ -35,7 +37,7 @@ export const ADMIN_AUTH_EVENT = "radar-admin-auth-change";
 export function installAuthFetch(): void {
   if (installed || typeof window === "undefined") return;
   installed = true;
-  const orig = window.fetch.bind(window);
+  const orig = boundedFetch(window.fetch.bind(window), window.location.href);
   window.fetch = ((input: RequestInfo | URL, init: RequestInit = {}) => {
     const token = getToken();
     const url = new URL(input instanceof Request ? input.url : String(input), window.location.href);

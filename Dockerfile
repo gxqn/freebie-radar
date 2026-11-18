@@ -15,7 +15,8 @@ ENV NODE_ENV=production
 ENV NODE_OPTIONS="--max-old-space-size=192"
 # curl + ca-certificates：部分源的 Cloudflare 对 Node undici TLS 指纹返回 403，
 # RSS/直连采集通过 curl 拿 200，可显著减少对 FlareSolverr 的依赖。
-RUN apk add --no-cache curl ca-certificates
+# flock keeps collection mutually exclusive even if the host ingress restarts.
+RUN apk add --no-cache curl ca-certificates util-linux
 COPY package.json pnpm-lock.yaml ./
 RUN npm i -g pnpm@10 \
     && pnpm install --frozen-lockfile --prod \

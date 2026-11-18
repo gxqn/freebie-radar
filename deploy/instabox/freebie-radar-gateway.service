@@ -1,0 +1,28 @@
+[Unit]
+Description=Freebie Radar private ingress and bounded collection dispatch
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=user
+Group=user
+SupplementaryGroups=docker
+WorkingDirectory=/data/workspace/freebie-radar
+EnvironmentFile=/data/workspace/freebie-radar/.gateway.env
+ExecStart=/usr/bin/python3 /data/workspace/freebie-radar/deploy/instabox/gateway.py
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/data/workspace/freebie-radar/gateway-state
+MemoryMax=128M
+CPUQuota=25%
+TasksMax=64
+
+[Install]
+WantedBy=multi-user.target

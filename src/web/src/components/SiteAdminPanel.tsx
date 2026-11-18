@@ -12,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import { getToken } from "../lib/auth.ts";
+import { createForegroundTaskPoller } from "../lib/deployment-status.ts";
 
 type Access = {
   loginEnabled: boolean;
@@ -179,28 +180,43 @@ export function SiteAdminPanel() {
       const data = (await res.json().catch(() => ({}))) as { job?: UpdateJob; error?: string };
       if (!res.ok) return notify(data.error ?? "启动失败");
       setJob(data.job ?? null);
-      pollJob();
     } finally {
       setBusy(null);
     }
   };
 
-  const pollJob = useCallback(() => {
-    let n = 0;
-    const timer = setInterval(async () => {
-      n += 1;
-      const res = await fetch("/api/admin/update/status", { headers: authHeaders() });
-      if (res.ok) {
+  useEffect(() => {
+    if (job?.status !== "running") return;
+    let active = true;
+    let attempts = 0;
+    const controller = createForegroundTaskPoller(async () => {
+      attempts += 1;
+      try {
+        const res = await fetch("/api/admin/update/status", { headers: authHeaders() });
+        if (!active) return;
+        if (!res.ok) { active = false; notify(`更新状态查询失败（${res.status}），已停止自动查询`); return; }
         const data = (await res.json()) as { job: UpdateJob | null };
+        if (!active) return;
         setJob(data.job);
         if (data.job && data.job.status !== "running") {
-          clearInterval(timer);
+          active = false;
           notify(data.job.status === "done" ? "更新完成" : "更新失败：" + (data.job.error ?? ""));
         }
+      } catch {
+        active = false;
+        notify("更新状态查询超时或断网，已停止自动查询");
       }
-      if (n > 100) clearInterval(timer);
-    }, 2000);
-  }, [notify]);
+    });
+    const timer = window.setInterval(() => {
+      if (!active || attempts >= 100) { window.clearInterval(timer); return; }
+      void controller.poll(true, document.visibilityState === "visible");
+    }, 5000);
+    const visibility = () => {
+      if (document.visibilityState !== "visible") { void controller.poll(true, false); window.clearInterval(timer); }
+    };
+    document.addEventListener("visibilitychange", visibility);
+    return () => { active = false; window.clearInterval(timer); document.removeEventListener("visibilitychange", visibility); };
+  }, [job?.id, job?.status, notify]);
 
   return (
     <div className="space-y-4">
