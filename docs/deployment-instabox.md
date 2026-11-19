@@ -56,4 +56,13 @@
 - 浏览器只模拟权威冷却状态，验证倒计时提示与真实KV列表同时可见；**没有制造真实平台冷却或停止VM来做破坏性测试**。
 - [真实页面截图](../.deploy-private/hybrid-live.png)、[冷却提示模拟截图](../.deploy-private/hybrid-cooldown-simulation.png)。
 
+## 2026-11-19 前端主题与图标发布
+
+- 正式版本 `ui-20261119T024617Z-c2b808` 已上线：https://zoomzero.pages.dev 。功能代码提交 `83e48e6`，本地分支 `feat/theme-favicon`，未推送远程 Git。
+- favicon 改为用户提供的 AI 橙黑圆盘图，PNG 32/192、ICO 16/32/48、Apple 180；版本化浏览器图标路径，线上响应200且 SHA256 与本机一致。
+- 浅/深色手动切换，默认浅色，`radar_theme` 保存偏好；已存深色在首屏前初始化。覆盖公共页、详情、弹窗和管理组件语义配色；未改后端或数据库。
+- Gemini 4hy 参与开发与独立审核；多文件工具链被上游 `MALFORMED_FUNCTION_CALL` 中断后，由主助手修正并执行工具。此前的「无可用账号」本轮未复现，不能据此承诺上游已彻底修复。
+- 测试153项、发布流程3项通过；类型检查、构建通过。主助手用 Chromium 在正式域名复验桌面/手机浅深切换、刷新记忆、详情、弹窗、管理入口及图标，页面错误0、无横向溢出。
+- [实施记录与审核备注](superpowers/plans/2026-11-19-theme-favicon.md)、[正式站深色截图](../.deploy-private/theme-verification/desktop-dark.png)、[手机深色截图](../.deploy-private/theme-verification/mobile-dark.png)。
+
 官方规则：[自动暂停与最大运行时间](https://instabox.sh/docs/machines/auto-pause.md)、[私有端口与自动唤醒](https://instabox.sh/docs/access/ports.md)。
