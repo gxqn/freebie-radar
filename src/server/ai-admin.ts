@@ -148,6 +148,12 @@ export async function backfillAi(
         ? ""
         : "AND ai IS NULL";
 
+  const scheduledWhere = options.scheduled
+    ? 'AND COALESCE(published_at, first_seen_at) >= ? AND (expires_at IS NULL OR julianday(expires_at) IS NULL OR julianday(expires_at) > julianday(?))'
+    : '';
+  const scheduledParams = options.scheduled
+    ? [new Date(Date.now() - 72 * 3600000).toISOString(), new Date().toISOString()]
+    : [];
   const rows = all<{
     id: number;
     source_id: string;
@@ -162,9 +168,9 @@ export async function backfillAi(
     expires_at: string | null;
   }>(
     `SELECT id, source_id, external_id, title, summary, content, url, score, category, published_at, expires_at
-     FROM items WHERE status = 'active' ${whereExtra}
+     FROM items WHERE status = 'active' ${whereExtra} ${scheduledWhere}
      ORDER BY COALESCE(published_at, first_seen_at) DESC LIMIT ?`,
-    scanLimit,
+    ...scheduledParams, scanLimit,
   );
   const blockRules = loadActiveBlockRules();
   const unblocked: typeof rows = [];

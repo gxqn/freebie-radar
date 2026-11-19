@@ -10,7 +10,7 @@ Alternatives: AI-before-push delays time-sensitive posts; merely running AI at f
 ## AI contract
 - Production AI_REVIEW_MODE=scheduled. Ordinary collectors (including ingest), user/global push and automatic semantic dedup never call a model in this mode. Manual explicit admin connection tests/reviews remain manual operations and are documented separately.
 - Beijing slots 08:00, 11:00, 14:00, 18:00, 22:00, timezone fixed Asia/Shanghai. A job may run within its matching hour, not catch up missed AI slots outside those hours.
-- Each scheduled slot: at most one actual model HTTP attempt, including errors/timeouts/invalid output; no retries. At most20 recent pending eligible items in one request, max420-character excerpt each. Max5 automatic attempts per Beijing day.
+- Each scheduled slot: at most one actual model HTTP attempt, including errors/timeouts/invalid output; no retries. At most20 recent pending eligible items (last72hours, not already expired) in one request, max420-character excerpt each. Max5 automatic attempts per Beijing day.
 - A unique SQLite settings ledger key per Beijing day/slot is atomically reserved immediately before the outbound call. Repeated/concurrent CLI processes or restarts cannot reclaim a consumed slot. Empty/disabled work consumes no request.
 - No semantic dedup call or push/re-push after this scheduled review. Other pending items wait for later slots; do not immediately launch the existing historical backlog on deployment.
 

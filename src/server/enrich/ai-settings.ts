@@ -323,6 +323,8 @@ async function callOnce(
   const tag = `[ai] batch n=${payload.length} idx=${payload[0]?.index ?? "-"}`;
   try {
     const res = await fetch(endpoint, {
+      // Redirects are additional actual HTTP attempts, not part of a single budgeted request.
+      redirect: origin === 'scheduled' ? 'error' : 'follow',
       method: "POST",
       headers: {
         "content-type": "application/json",

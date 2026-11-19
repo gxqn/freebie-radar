@@ -126,6 +126,23 @@ test("推送记录带上「为什么推它」的原因", async () => {
   assert.ok(batchLogs.every((l) => typeof l.reason === "string" && l.reason.length > 0), "攒批要给出原因摘要");
 });
 
+test('scheduled drain continues after fully filtered leading batch but stops at quiet/caps', async () => {
+  const p = await import('../src/server/push.ts');
+  savePushSettings({ ...DEFAULT_SETTINGS, instantScore:50, batchScore:45, aiFallbackMode:'ignore_ai', maxPerHour:100, maxPerBatch:8, batchIntervalMin:30, quietEnabled:false, dedupeByTitle:false });
+  while (queueSize()) await flushBatch(false);
+  const rows = Array.from({length:10}, (_, i) => { const title='规则攒批测试-'+i; return freshOf(seedItem(title,47),title,47); });
+  await pushInstant('linuxdo-welfare',rows);
+  assert.equal(queueSize(),10);
+  for (const r of rows.slice(0,8)) run("UPDATE items SET status='ignored' WHERE id=?",r.id);
+  assert.equal(await p.drainCurrentBatchQueue(),2);
+  assert.equal(queueSize(),0);
+  await pushInstant('linuxdo-welfare',[freshOf(seedItem('夜间免扰测试',47),'夜间免扰测试',47)]);
+  savePushSettings({quietEnabled:true,quietHours:'00:00-23:59'});
+  assert.equal(await p.drainCurrentBatchQueue(),0);
+  assert.equal(queueSize(),1);
+  savePushSettings({quietEnabled:false}); await flushBatch(false);
+});
+
 test("预览与真实推送共用同一套上限算法：能发几条、顺延几条口径一致", () => {
   // 只让预览看这一批测试数据，避免被前面用例留下的条目干扰
   savePushSettings({

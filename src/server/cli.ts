@@ -4,7 +4,7 @@ import { calibrateScoreByObtain, resolveDbMergeKey } from "./enrich/alias.ts";
 import { backfillAi } from "./ai-admin.ts";
 import { runAll, runSource, ensureSources } from "./collectors/index.ts";
 import { lastDigests, runDaily } from "./digest.ts";
-import { getPushSettings, passesPushFilters, flushBatch, queueSize } from "./push.ts";
+import { getPushSettings, passesPushFilters, drainCurrentBatchQueue } from "./push.ts";
 import { runDailyCleanup, runScheduledAi } from './automation.ts';
 import { guessObtain } from "./enrich/obtain.ts";
 import { getSourceHints, reconcileSourceCategory, applyManualClassification } from "./source-settings.ts";
@@ -24,7 +24,7 @@ async function main() {
       console.log(`[collect] done: ${results.length} sources, ${failed} failed, ${results.reduce((n,r) => n+r.inserted,0)} inserted`);
       if (failed && failed === results.length) process.exitCode = 1;
       // Drain only this process's new queue before exit. Quiet hours/hourly cap still apply.
-      for (let i=0; i<25 && queueSize()>0; i++) { if (!(await flushBatch(false))) break; }
+      await drainCurrentBatchQueue();
       try { console.log('[maintenance] scheduled-ai', JSON.stringify(await runScheduledAi())); }
       catch (err) { console.error('[maintenance] AI failed:', err instanceof Error ? err.message : String(err)); }
       break;

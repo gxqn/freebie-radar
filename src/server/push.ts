@@ -988,6 +988,17 @@ published_at: string | null;
  * 攒批推送（发送前二次回查 DB 最新状态 / 最新屏蔽词 / 最新推送规则）
  * ------------------------------------------------------------------ */
 
+/** Finite current-process drain: a filtered batch makes progress even when it sends zero. */
+export async function drainCurrentBatchQueue(): Promise<number> {
+  let sent = 0;
+  for (let i = 0; i < 100 && queue.length; i++) {
+    const before = queue.length;
+    sent += await flushBatch(false);
+    if (queue.length >= before) break; // quiet hours, cap, disabled channel, or retryable send failure
+  }
+  return sent;
+}
+
 export async function flushBatch(force = false): Promise<number> {
   if (!queue.length) return 0;
   const s = getPushSettings();
