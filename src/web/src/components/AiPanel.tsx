@@ -431,7 +431,7 @@ export function AiPanel({
               onClick={runBackfill}
               disabled={Boolean(backfillBlocked)}
               title={backfillBlocked ?? undefined}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-1 text-[12px] font-medium text-white hover:bg-brand-hover disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-1 text-[12px] font-medium text-on-solid hover:bg-brand-hover disabled:opacity-50"
             >
               {backfilling ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
               立即执行
@@ -580,7 +580,7 @@ export function AiPanel({
                   </div>
 
                   {/* 柔和流光进度条 */}
-                  <div className="relative h-2 overflow-hidden rounded-full bg-white/80 ring-1 ring-brand-border/60">
+                  <div className="relative h-2 overflow-hidden rounded-full bg-surface/80 ring-1 ring-brand-border/60">
                     <div
                       className="relative h-full overflow-hidden rounded-full bg-accent transition-[width] duration-300 ease-out"
                       style={{ width: Math.max(6, pct) + "%" }}
@@ -606,7 +606,7 @@ export function AiPanel({
                       {job.recentEvents.slice(0, 4).map((ev, idx) => (
                         <div
                           key={ev.title + idx}
-                          className="ai-enter flex items-center gap-2 rounded bg-white/85 px-2.5 py-1 text-[12px]"
+                          className="ai-enter flex items-center gap-2 rounded bg-surface/85 px-2.5 py-1 text-[12px]"
                         >
                           <span className={"shrink-0 " + (ev.keep ? "text-deal" : "text-alert")}>
                             {ev.keep ? <Check size={12} /> : <CircleX size={12} />}
@@ -836,7 +836,7 @@ export function AiPanel({
                   className={
                     "rounded-lg border px-2.5 py-1 text-[11.5px] font-medium transition-colors " +
                     (form.sourceMode === m.key
-                      ? "border-brand bg-brand text-white"
+                      ? "border-brand bg-brand text-on-solid"
                       : "border-ink-200 bg-surface text-ink-700 hover:bg-ink-100")
                   }
                 >
@@ -1091,7 +1091,7 @@ export function AiPanel({
               })
             }
             disabled={saving}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-1.5 text-[12.5px] font-medium text-white hover:bg-brand-hover disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-1.5 text-[12.5px] font-medium text-on-solid hover:bg-brand-hover disabled:opacity-60"
           >
             {saving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
             保存配置
@@ -1167,7 +1167,7 @@ export function AiPanel({
                   onClick={() => setSampleFilter(tabItem.key)}
                   className={
                     "rounded px-2 py-0.5 font-medium transition-colors " +
-                    (sampleFilter === tabItem.key ? "bg-ink-950 text-white" : "text-ink-500 hover:text-ink-950")
+                    (sampleFilter === tabItem.key ? "bg-ink-950 text-on-solid" : "text-ink-500 hover:text-ink-950")
                   }
                 >
                   {tabItem.label}

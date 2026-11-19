@@ -2,12 +2,19 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <!-- 声明只支持浅色：阻止 Chrome/Edge 的「自动深色」把整站反相成灰黑描边 -->
-    <meta name="color-scheme" content="only light" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>资源雷达 · Resource Radar</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/radar-favicon-v2.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="/radar-favicon-v2.png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
     <meta name="description" content="聚合社区福利、黑五特价、拼车交易、开源项目与科技资讯的多兴趣资源雷达" />
+    <script>
+      (function () {
+        var dark = false;
+        try { dark = localStorage.getItem('radar_theme') === 'dark'; } catch (_) {}
+        document.documentElement.classList.toggle('dark', dark);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,4 +1,5 @@
 import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type Theme, readTheme, applyTheme, saveTheme } from "./lib/theme.ts";
 import {
   Activity,
   AlignJustify,
@@ -33,6 +34,8 @@ import {
   Globe2,
   Github,
   BookOpen,
+  Sun,
+  Moon,
   LogOut,
 } from "lucide-react";
 import { CompactRow, ItemCard, ItemDetailDrawer, QuickBlockModal } from "./components/ItemView.tsx";
@@ -168,7 +171,7 @@ function useApi<T>(url: string | null, scope = ""): { data: T | null; readMetada
 function Toast({ message }: { message: string | null }) {
   if (!message) return null;
   return (
-    <div role="status" aria-live="polite" className="toast-enter fixed bottom-6 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-2 rounded-lg border border-ink-800 bg-ink-950 px-3.5 py-2 text-[12.5px] font-medium text-white shadow-lg">
+    <div role="status" aria-live="polite" className="toast-enter fixed bottom-6 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-2 rounded-lg border border-ink-800 bg-ink-950 px-3.5 py-2 text-[12.5px] font-medium text-on-solid shadow-lg">
       <Bell size={14} className="text-ink-300" />
       {message}
     </div>
@@ -390,6 +393,15 @@ export function App() {
   const [mobileFilterBar, setMobileFilterBar] = useState(false);
   const [advancedFilters, setAdvancedFilters] = useState(false);
   const searchRef = useRef<HTMLInputElement | null>(null);
+
+  const [theme, setTheme] = useState<Theme>(() => {
+    try { return readTheme(window.localStorage); } catch { return "light"; }
+  });
+  useEffect(() => {
+    applyTheme(theme, document.documentElement);
+    try { saveTheme(theme, window.localStorage); } catch { /* storage itself may be blocked */ }
+  }, [theme]);
+  const toggleTheme = () => setTheme((current) => current === "dark" ? "light" : "dark");
 
   useEffect(() => {
     const onSlash = (e: KeyboardEvent) => {
@@ -847,6 +859,15 @@ export function App() {
       >
         <Globe2 size={14} />
       </button>
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className={ICON_BTN}
+        title={theme === "dark" ? "切换浅色主题" : "切换深色主题"}
+        aria-label={theme === "dark" ? "切换浅色主题" : "切换深色主题"}
+      >
+        {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
+      </button>
     </>
   );
 
@@ -898,7 +919,7 @@ export function App() {
         setAuthHash(null);
         setAuthOpen(true);
       }}
-      className="inline-flex shrink-0 items-center gap-1 rounded-md bg-ink-950 px-2 py-1 text-[11.5px] font-medium whitespace-nowrap text-white hover:bg-brand-hover"
+      className="inline-flex shrink-0 items-center gap-1 rounded-md bg-ink-950 px-2 py-1 text-[11.5px] font-medium whitespace-nowrap text-on-solid hover:bg-brand-hover"
       title="用 LINUX DO 登录"
     >
       <User size={12} /> 登录
@@ -1024,7 +1045,6 @@ export function App() {
           </span>
           <div className="flex items-center gap-1 lg:hidden">
             {helpRssNode}
-            {githubNode}
             {tab === "feed" && <a href={exportUrl} className={ICON_BTN} title="按当前筛选导出 Markdown">
               <Download size={14} />
             </a>}
@@ -1037,7 +1057,6 @@ export function App() {
         {/* 桌面侧栏第二行：说明/RSS + 账号；移动端这两个入口已分别并入品牌行与导航行 */}
         <div className="mt-2 hidden items-center gap-1 px-1 lg:mt-0 lg:flex">
           {helpRssNode}
-          {githubNode}
           <div className="ml-auto min-w-0">{accountNode}</div>
         </div>
 
@@ -1120,7 +1139,7 @@ export function App() {
               className={
                 "flex shrink-0 items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors lg:w-full " +
                 (tab === t.key
-                  ? "bg-ink-950 text-white lg:bg-canvas-subtle lg:font-semibold lg:text-ink-950"
+                  ? "bg-ink-950 text-on-solid lg:bg-canvas-subtle lg:font-semibold lg:text-ink-950"
                   : "text-ink-600 hover:bg-canvas-subtle/70 hover:text-ink-950")
               }
             >
@@ -1155,7 +1174,7 @@ export function App() {
               className={
                 "flex shrink-0 items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors lg:w-full " +
                 (tab === t.key
-                  ? "bg-ink-950 text-white lg:bg-canvas-subtle lg:font-semibold lg:text-ink-950"
+                  ? "bg-ink-950 text-on-solid lg:bg-canvas-subtle lg:font-semibold lg:text-ink-950"
                   : "text-ink-600 hover:bg-canvas-subtle/70 hover:text-ink-950")
               }
             >
@@ -1168,7 +1187,7 @@ export function App() {
                   className={
                     "rounded px-1.5 py-0.5 font-mono text-[11px] tabular-nums " +
                     (tab === t.key
-                      ? "bg-white/20 text-white lg:bg-surface lg:text-ink-700"
+                      ? "bg-white/20 text-on-solid lg:bg-surface lg:text-ink-700"
                       : "bg-ink-200/80 text-ink-600")
                   }
                 >
@@ -1295,7 +1314,7 @@ export function App() {
                     className={
                       "relative inline-flex h-7 w-7 items-center justify-center rounded-md border transition-colors " +
                       (mobileFilterBar
-                        ? "border-ink-950 bg-ink-950 text-white"
+                        ? "border-ink-950 bg-ink-950 text-on-solid"
                         : "border-ink-200 bg-surface text-ink-600")
                     }
                     title="筛选条件"
@@ -1304,7 +1323,7 @@ export function App() {
                   >
                     <SlidersHorizontal size={14} />
                     {activeFilterCount > 0 && (
-                      <span className="absolute -top-1 -right-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-accent px-0.5 font-mono text-[9px] leading-none text-white">
+                      <span className="absolute -top-1 -right-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-accent px-0.5 font-mono text-[9px] leading-none text-on-solid">
                         {activeFilterCount}
                       </span>
                     )}
@@ -1358,7 +1377,7 @@ export function App() {
                           className={
                             "inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-0.5 text-[11.5px] transition-colors active:scale-[0.97] " +
                             (active
-                              ? "bg-ink-950 font-medium text-white"
+                              ? "bg-ink-950 font-medium text-on-solid"
                               : n > 0
                                 ? "text-ink-600 hover:bg-ink-100 hover:text-ink-950"
                                 : "text-ink-400 hover:bg-ink-100")
@@ -1366,7 +1385,7 @@ export function App() {
                         >
                           <span>{categoryLabelForPreset(key, preset)}</span>
                           {n > 0 && (
-                            <span className={"font-mono text-[10.5px] tabular-nums " + (active ? "text-white/75" : "text-ink-400")}>
+                            <span className={"font-mono text-[10.5px] tabular-nums " + (active ? "text-on-solid/75" : "text-ink-400")}>
                               {n}
                             </span>
                           )}
@@ -1401,7 +1420,7 @@ export function App() {
                       className={
                         "inline-flex h-7 items-center gap-1.5 rounded-md border px-2.5 text-[12px] transition-colors " +
                         (categories.length
-                          ? "border-ink-950 bg-ink-950 font-medium text-white"
+                          ? "border-ink-950 bg-ink-950 font-medium text-on-solid"
                           : "border-ink-200 bg-surface text-ink-700 hover:border-ink-300")
                       }
                     >
@@ -1448,14 +1467,14 @@ export function App() {
                                   className={
                                     "flex items-center justify-between rounded border px-2 py-1 text-left text-[11.5px] transition-colors " +
                                     (checked
-                                      ? "border-ink-950 bg-ink-950 font-medium text-white"
+                                      ? "border-ink-950 bg-ink-950 font-medium text-on-solid"
                                       : n > 0
                                         ? "border-ink-200 bg-surface text-ink-700 hover:bg-ink-100"
                                         : "border-ink-100 bg-canvas/70 text-ink-400 hover:bg-ink-100")
                                   }
                                 >
                                   <span className="truncate">{categoryLabelForPreset(key, preset)}</span>
-                                  <span className={"ml-1 font-mono text-[10.5px] " + (checked ? "text-white/70" : "text-ink-400")}>
+                                  <span className={"ml-1 font-mono text-[10.5px] " + (checked ? "text-on-solid/70" : "text-ink-400")}>
                                     {n}
                                   </span>
                                 </button>
@@ -1585,7 +1604,7 @@ export function App() {
                     className={
                       "h-7 rounded-md border px-2.5 text-[12px] font-medium transition-colors active:scale-[0.97] " +
                       (unreadOnly
-                        ? "border-ink-950 bg-ink-950 text-white"
+                        ? "border-ink-950 bg-ink-950 text-on-solid"
                         : "border-ink-200 bg-surface text-ink-600 hover:border-ink-300")
                     }
                   >
@@ -1641,7 +1660,7 @@ export function App() {
                           onClick={() => updateViewMode(v.key)}
                           className={
                             "inline-flex items-center gap-1 rounded px-2 py-1 text-[11.5px] font-medium transition-colors " +
-                            (viewMode === v.key ? "bg-ink-950 text-white" : "text-ink-500 hover:text-ink-950")
+                            (viewMode === v.key ? "bg-ink-950 text-on-solid" : "text-ink-500 hover:text-ink-950")
                           }
                           title={v.label}
                         >
@@ -1887,7 +1906,7 @@ export function App() {
                   </p>
                   <div className="flex gap-2">
                     {activeFilterCount > 0 && <button type="button" onClick={resetFilters} className="rounded-md border border-ink-200 px-4 py-2 text-[12.5px] font-medium text-ink-700 hover:bg-ink-100">清除当前条件</button>}
-                    <button type="button" onClick={() => { resetFilters(); setPreset("all"); }} className="rounded-md bg-brand px-4 py-2 text-[12.5px] font-medium text-white hover:bg-brand-hover">浏览全部收录</button>
+                    <button type="button" onClick={() => { resetFilters(); setPreset("all"); }} className="rounded-md bg-brand px-4 py-2 text-[12.5px] font-medium text-on-solid hover:bg-brand-hover">浏览全部收录</button>
                   </div>
                 </div>
                 )

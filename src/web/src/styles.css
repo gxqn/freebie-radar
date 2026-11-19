@@ -9,6 +9,7 @@
 
   --color-ink-950: #111318;
   --color-ink-900: #1b1e26;
+  --color-ink-800: #293241;
   --color-ink-700: #374151;
   --color-ink-600: #4b5563;
   --color-ink-500: #525c6b;
@@ -17,6 +18,8 @@
   --color-ink-200: #e6e8ec;
   --color-ink-100: #f1f3f6;
 
+  --color-backdrop: #111318;
+  --color-on-solid: #ffffff;
   --color-brand: #111318;
   --color-brand-hover: #272b36;
   --color-brand-dark: #090a0d;
@@ -45,7 +48,42 @@
 
 @layer base {
   html {
-    color-scheme: only light;
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+    --color-canvas: #10131a;
+    --color-canvas-subtle: #202633;
+    --color-surface: #171b24;
+    --color-surface-hover: #222937;
+    --color-surface-muted: #202633;
+    --color-ink-950: #f8fafc;
+    --color-ink-900: #edf1f7;
+    --color-ink-800: #dde5ef;
+    --color-ink-700: #d2dae6;
+    --color-ink-600: #b9c4d4;
+    --color-ink-500: #a4b0c2;
+    --color-ink-400: #97a5ba;
+    --color-ink-300: #475569;
+    --color-ink-200: #343f52;
+    --color-ink-100: #202633;
+    --color-on-solid: #111827;
+    --color-brand: #edf1f7;
+    --color-brand-hover: #cbd5e1;
+    --color-brand-dark: #ffffff;
+    --color-brand-subtle: #252344;
+    --color-brand-border: #57538b;
+    --color-accent: #b5b4ff;
+    --color-deal: #6ee7b7;
+    --color-deal-subtle: #102e28;
+    --color-deal-border: #2b6653;
+    --color-code: #fcd58a;
+    --color-code-subtle: #332819;
+    --color-code-border: #79613a;
+    --color-alert: #fca5a5;
+    --color-alert-subtle: #381f27;
+    --color-alert-border: #854351;
+    --shadow-drawer: -8px 0 32px rgba(0, 0, 0, 0.4), -1px 0 0 #343f52;
   }
   body {
     margin: 0;
@@ -60,7 +98,7 @@
     outline-offset: 2px;
   }
   ::selection {
-    background-color: rgba(49, 46, 129, 0.14);
+    background-color: rgba(99, 102, 241, 0.2);
     color: var(--color-ink-950);
   }
   ::-webkit-scrollbar {
@@ -71,11 +109,11 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #d1d5de;
+    background: var(--color-ink-300);
     border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
+    background: var(--color-ink-400);
   }
 }
 
@@ -89,7 +127,6 @@
   box-shadow: var(--shadow-drawer);
 }
 
-/* Dense reading surfaces, calm configuration surfaces — not one density for every task. */
 .workspace-rail { scrollbar-gutter: stable; }
 .workspace-rail nav button { min-height: 36px; }
 .workspace-rail nav button[aria-current="page"] {
@@ -158,6 +195,7 @@
 .setup-step-number { display: grid; width: 28px; height: 28px; flex-shrink: 0; place-items: center; border: 1px solid var(--color-ink-300); border-radius: 50%; font-size: 12px; }
 .setup-step[data-current="true"] .setup-step-number { border-color: var(--color-brand-border); background: var(--color-surface); }
 .setup-step[data-done="true"] .setup-step-number { color: var(--color-deal); border-color: var(--color-deal-border); background: var(--color-deal-subtle); }
+
 @media (min-width: 1024px) {
   .workspace-rail { position: sticky; top: 0; height: 100dvh; overflow-y: auto; }
   .workspace-content { max-width: 1360px; width: 100%; margin-inline: auto; }
@@ -178,147 +216,64 @@
 }
 
 @keyframes ai-shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(220%);
-  }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(220%); }
 }
 
 @keyframes ai-enter {
-  0% {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  0% { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes ai-pulse-ring {
-  0% {
-    transform: scale(0.85);
-    opacity: 0.75;
-  }
-  70% {
-    transform: scale(1.95);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1.95);
-    opacity: 0;
-  }
+  0% { transform: scale(0.85); opacity: 0.75; }
+  70% { transform: scale(1.95); opacity: 0; }
+  100% { transform: scale(1.95); opacity: 0; }
 }
 
-.ai-shimmer {
-  animation: ai-shimmer 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-
-.ai-enter {
-  animation: ai-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.ai-pulse-ring {
-  animation: ai-pulse-ring 1.9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-}
+.ai-shimmer { animation: ai-shimmer 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.ai-enter { animation: ai-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.ai-pulse-ring { animation: ai-pulse-ring 1.9s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
 
 @keyframes drawer-in {
-  0% {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  0% { opacity: 0; transform: translateX(20px); }
+  100% { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes backdrop-in {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 @keyframes pop-in {
-  0% {
-    opacity: 0;
-    transform: translateY(-4px) scale(0.97);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  0% { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes sheet-up {
-  0% {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  0% { opacity: 0; transform: translateY(14px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes toast-up {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 10px) scale(0.97);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(-50%, 0) scale(1);
-  }
+  0% { opacity: 0; transform: translate(-50%, 10px) scale(0.97); }
+  100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }
 
 @keyframes list-fade {
-  0% {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  0% { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
-.drawer-enter {
-  animation: drawer-in 210ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
+.drawer-enter { animation: drawer-in 210ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.backdrop-enter { animation: backdrop-in 180ms ease-out both; }
+.pop-enter { animation: pop-in 150ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.sheet-enter { animation: sheet-up 200ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.toast-enter { animation: toast-up 180ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.list-enter { animation: list-fade 180ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-.backdrop-enter {
-  animation: backdrop-in 180ms ease-out both;
-}
-
-.pop-enter {
-  animation: pop-in 150ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.sheet-enter {
-  animation: sheet-up 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.toast-enter {
-  animation: toast-up 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.list-enter {
-  animation: list-fade 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .drawer-enter,

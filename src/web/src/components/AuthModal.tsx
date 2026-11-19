@@ -95,7 +95,7 @@ export function AuthModal({
   };
 
   return (
-    <div className="backdrop-enter fixed inset-0 z-[70] flex items-center justify-center bg-ink-950/35 px-4">
+    <div className="backdrop-enter fixed inset-0 z-[70] flex items-center justify-center bg-backdrop/35 px-4">
       <div className="sheet-enter panel w-full max-w-[420px] overflow-hidden">
         <div className="flex items-start justify-between gap-3 border-b border-ink-100 px-5 py-3.5">
           <div>
@@ -146,7 +146,7 @@ export function AuthModal({
                 type="button"
                 onClick={() => void submitInvite()}
                 disabled={busy === "invite" || !invite.trim()}
-                className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-ink-950 px-3 py-2 text-[13px] font-medium text-white hover:bg-brand-hover disabled:opacity-60"
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-ink-950 px-3 py-2 text-[13px] font-medium text-on-solid hover:bg-brand-hover disabled:opacity-60"
               >
                 {busy === "invite" ? <Loader2 size={14} className="animate-spin" /> : <Ticket size={14} />}
                 验证并完成注册
@@ -176,7 +176,7 @@ export function AuthModal({
                     type="button"
                     onClick={() => startLogin(invite)}
                     disabled={!boot.oauthConfigured}
-                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-ink-950 px-3 py-2 text-[13px] font-medium text-white hover:bg-brand-hover disabled:opacity-60"
+                    className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-ink-950 px-3 py-2 text-[13px] font-medium text-on-solid hover:bg-brand-hover disabled:opacity-60"
                   >
                     <LogIn size={14} />
                     跳转 LINUX DO 授权

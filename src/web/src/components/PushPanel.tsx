@@ -353,7 +353,7 @@ export function PushPanel({
               onClick={() => setSubTab(t.key)}
               className={
                 "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12.5px] font-medium transition-colors " +
-                (subTab === t.key ? "bg-brand text-white" : "text-ink-600 hover:bg-ink-100")
+                (subTab === t.key ? "bg-brand text-on-solid" : "text-ink-600 hover:bg-ink-100")
               }
             >
               <t.icon size={13} />
@@ -554,7 +554,7 @@ export function PushPanel({
                         className={
                           "rounded-lg border px-2 py-1.5 text-[11.5px] font-medium transition-colors " +
                           (active
-                            ? "border-brand bg-brand text-white"
+                            ? "border-brand bg-brand text-on-solid"
                             : "border-ink-200 bg-surface text-ink-700 hover:bg-ink-100")
                         }
                       >
@@ -607,7 +607,7 @@ export function PushPanel({
                       className={
                         "rounded-lg border px-2 py-1.5 text-[12px] font-medium transition-colors " +
                         (s.langMode === o.key
-                          ? "border-brand bg-brand text-white"
+                          ? "border-brand bg-brand text-on-solid"
                           : "border-ink-200 bg-surface text-ink-700 hover:bg-ink-100")
                       }
                     >
@@ -710,7 +710,7 @@ export function PushPanel({
                         className={
                           "rounded border px-2 py-0.5 text-[11.5px] transition-colors " +
                           (same
-                            ? "border-brand bg-brand text-white"
+                            ? "border-brand bg-brand text-on-solid"
                             : "border-ink-200 bg-surface text-ink-600 hover:border-brand-border hover:text-brand")
                         }
                       >
@@ -1254,7 +1254,7 @@ export function PushPanel({
                                     setRouteDraft(null);
                                   });
                                 }}
-                                className="rounded bg-brand px-3 py-1 text-[11.5px] font-medium text-white hover:bg-brand-hover"
+                                className="rounded bg-brand px-3 py-1 text-[11.5px] font-medium text-on-solid hover:bg-brand-hover"
                               >
                                 保存路由
                               </button>
@@ -1285,7 +1285,7 @@ export function PushPanel({
                       className={
                         "rounded-lg border px-2.5 py-1 text-[11.5px] font-medium transition-colors " +
                         (s.sourceMode === m.key
-                          ? "border-brand bg-brand text-white"
+                          ? "border-brand bg-brand text-on-solid"
                           : "border-ink-200 bg-surface text-ink-700 hover:bg-ink-100")
                       }
                     >
@@ -1582,7 +1582,7 @@ export function PushPanel({
                       setBusy(null);
                     }
                   }}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-[12.5px] font-medium text-white transition-colors hover:bg-brand-hover"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-[12.5px] font-medium text-on-solid transition-colors hover:bg-brand-hover"
                 >
                   {busy === "preview" ? <Loader2 size={13} className="animate-spin" /> : <Eye size={13} />} 试算推送预览
                 </button>

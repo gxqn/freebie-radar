@@ -83,7 +83,7 @@ export function RulesPanel({
             type="button"
             disabled={busy || !kw.trim()}
             onClick={() => void addKeyword()}
-            className="inline-flex items-center gap-1 rounded-lg bg-brand px-3.5 py-2 text-[13px] font-medium text-white transition-colors hover:bg-brand-hover"
+            className="inline-flex items-center gap-1 rounded-lg bg-brand px-3.5 py-2 text-[13px] font-medium text-on-solid transition-colors hover:bg-brand-hover"
           >
             <Plus size={14} /> 添加
           </button>
@@ -195,7 +195,7 @@ export function RulesPanel({
                 setBusy(false);
               }
             }}
-            className="rounded-lg bg-brand px-3 py-2 text-[12.5px] font-medium text-white transition-colors hover:bg-brand-hover disabled:opacity-40 sm:col-span-2"
+            className="rounded-lg bg-brand px-3 py-2 text-[12.5px] font-medium text-on-solid transition-colors hover:bg-brand-hover disabled:opacity-40 sm:col-span-2"
           >
             添加屏蔽
           </button>

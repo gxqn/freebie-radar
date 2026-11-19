@@ -35,7 +35,7 @@ export function WelcomeModal({
   ].filter(Boolean) as { icon: typeof ShieldCheck; title: string; body: string }[];
 
   return (
-    <div className="backdrop-enter fixed inset-0 z-[70] flex items-center justify-center bg-ink-950/35 px-4">
+    <div className="backdrop-enter fixed inset-0 z-[70] flex items-center justify-center bg-backdrop/35 px-4">
       <div className="sheet-enter panel w-full max-w-[520px] overflow-hidden">
         <div className="flex items-start justify-between gap-3 border-b border-ink-100 px-5 py-3.5">
           <div className="flex items-center gap-2">
@@ -83,7 +83,7 @@ export function WelcomeModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg bg-ink-950 px-3.5 py-1.5 text-[12.5px] font-medium text-white hover:bg-brand-hover"
+            className="rounded-lg bg-ink-950 px-3.5 py-1.5 text-[12.5px] font-medium text-on-solid hover:bg-brand-hover"
           >
             开始使用
           </button>

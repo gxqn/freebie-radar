@@ -405,7 +405,7 @@ export function ItemCard({
           <span
             className={
               "absolute top-2.5 right-2.5 rounded-md px-2 py-0.5 font-mono text-[11.5px] font-semibold tabular-nums backdrop-blur-sm " +
-              (item.score >= 70 ? "bg-deal/90 text-white" : "bg-ink-950/75 text-white")
+              (item.score >= 70 ? "bg-deal/90 text-on-solid" : "bg-ink-950/75 text-on-solid")
             }
           >
             {Math.round(item.score)}
@@ -644,7 +644,7 @@ export function ItemDetailDrawer({
   }, [onClose, hasPrev, hasNext, onPrev, onNext]);
 
   return (
-    <div className="backdrop-enter fixed inset-0 z-50 flex justify-end bg-ink-950/25 backdrop-blur-[1px]" onClick={onClose}>
+    <div className="backdrop-enter fixed inset-0 z-50 flex justify-end bg-backdrop/25 backdrop-blur-[1px]" onClick={onClose}>
       <aside
         ref={dialogRef}
         role="dialog"
@@ -812,7 +812,7 @@ export function ItemDetailDrawer({
             onClick={() => {
               if (!item.read) onPatch(item.id, { read: true });
             }}
-            className="inline-flex min-w-full flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand px-4 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-brand-hover sm:min-w-0 sm:py-2"
+            className="inline-flex min-w-full flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand px-4 py-2.5 text-[13px] font-medium text-on-solid transition-colors hover:bg-brand-hover sm:min-w-0 sm:py-2"
           >
             {item.kind === "news" || item.kind === "info" ? "查看原文详情" : "打开原帖领取"} <ArrowUpRight size={14} />
           </a>
@@ -883,7 +883,7 @@ export function QuickBlockModal({
 
   return (
     <div
-      className="backdrop-enter fixed inset-0 z-50 flex items-end justify-center bg-ink-950/30 backdrop-blur-[1px] sm:items-center sm:p-4"
+      className="backdrop-enter fixed inset-0 z-50 flex items-end justify-center bg-backdrop/30 backdrop-blur-[1px] sm:items-center sm:p-4"
       onClick={onClose}
     >
       <div
@@ -981,7 +981,7 @@ export function QuickBlockModal({
                   setBusy(false);
                 }
               }}
-              className="rounded-lg bg-alert px-4 py-2 text-[12.5px] font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-40"
+              className="rounded-lg bg-alert px-4 py-2 text-[12.5px] font-medium text-on-solid transition-colors hover:bg-alert/85 disabled:opacity-40"
             >
               加入屏蔽规则
             </button>

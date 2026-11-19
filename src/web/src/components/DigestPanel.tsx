@@ -50,7 +50,7 @@ export function DigestPanel({
               className={
                 "rounded-lg border px-3 py-1.5 text-[12px] font-medium transition-colors " +
                 (d.date === active
-                  ? "border-brand bg-brand text-white"
+                  ? "border-brand bg-brand text-on-solid"
                   : "border-ink-200 bg-surface text-ink-700 hover:bg-ink-100")
               }
             >
@@ -75,7 +75,7 @@ export function DigestPanel({
                   setRunning(false);
                 }
               }}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-[12.5px] font-medium text-white transition-colors hover:bg-brand-hover disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-[12.5px] font-medium text-on-solid transition-colors hover:bg-brand-hover disabled:opacity-50"
             >
               {running ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
               立即生成今日精选

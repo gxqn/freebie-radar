@@ -90,7 +90,7 @@ export function HotPanel({
                 onClick={() => onScope(s.key)}
                 className={
                   "rounded px-2.5 py-1 text-[11.5px] font-medium transition-colors active:scale-[0.98] " +
-                  (scope === s.key ? "bg-ink-950 text-white" : "text-ink-500 hover:text-ink-950")
+                  (scope === s.key ? "bg-ink-950 text-on-solid" : "text-ink-500 hover:text-ink-950")
                 }
               >
                 {s.label}
@@ -105,7 +105,7 @@ export function HotPanel({
                 onClick={() => onHours(w.hours)}
                 className={
                   "rounded px-2.5 py-1 text-[11.5px] font-medium transition-colors active:scale-[0.98] " +
-                  (hours === w.hours ? "bg-ink-950 text-white" : "text-ink-500 hover:text-ink-950")
+                  (hours === w.hours ? "bg-ink-950 text-on-solid" : "text-ink-500 hover:text-ink-950")
                 }
               >
                 {w.label}

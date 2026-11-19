@@ -454,7 +454,7 @@ function SourceInlineEditor({
               className={
                 "inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[12px] font-medium transition-colors " +
                 (confirmDel
-                  ? "border-alert bg-alert text-white"
+                  ? "border-alert bg-alert text-on-solid"
                   : "border-ink-200 bg-surface text-alert hover:border-alert/40 hover:bg-alert-subtle")
               }
             >
@@ -474,7 +474,7 @@ function SourceInlineEditor({
             type="button"
             disabled={saving || !name.trim() || (!showJson && source.kind === "rss" && feedRows.some((row) => !/^https?:\/\//i.test(row.url.trim())))}
             onClick={() => void handleSave()}
-            className="inline-flex items-center gap-1 rounded-lg bg-brand px-3 py-1 text-[12px] font-medium text-white hover:bg-brand-hover disabled:opacity-40"
+            className="inline-flex items-center gap-1 rounded-lg bg-brand px-3 py-1 text-[12px] font-medium text-on-solid hover:bg-brand-hover disabled:opacity-40"
           >
             {saving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />} 保存配置
           </button>
@@ -790,7 +790,7 @@ export function OpsPanel({
               onClick={() => setSubTab(t.key)}
               className={
                 "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12.5px] font-medium transition-colors " +
-                (subTab === t.key ? "bg-brand text-white" : "text-ink-600 hover:bg-ink-100")
+                (subTab === t.key ? "bg-brand text-on-solid" : "text-ink-600 hover:bg-ink-100")
               }
             >
               <t.icon size={13} />
@@ -898,7 +898,7 @@ export function OpsPanel({
                       type="button"
                       disabled={cookieBusy !== null}
                       onClick={() => void saveCookiePatch({ runnerUrl: runnerUrlInput, xhsProxy: xhsProxyInput }, "save-net")}
-                      className="inline-flex h-8 flex-1 items-center justify-center rounded-lg bg-ink-950 px-2.5 text-[12px] font-medium text-white hover:bg-ink-800 disabled:opacity-40"
+                      className="inline-flex h-8 flex-1 items-center justify-center rounded-lg bg-ink-950 px-2.5 text-[12px] font-medium text-on-solid hover:bg-ink-800 disabled:opacity-40"
                     >
                       {cookieBusy === "save-net" ? <Loader2 size={12} className="animate-spin" /> : "保存线路"}
                     </button>
@@ -970,7 +970,7 @@ export function OpsPanel({
                               type="button"
                               disabled={!draft.trim() || cookieBusy !== null}
                               onClick={() => void saveCookiePatch({ cookies: { [site.key]: draft } }, `save-${site.key}`, site.key)}
-                              className="inline-flex h-7 items-center gap-1 rounded-md bg-brand px-2.5 text-[11.5px] font-medium text-white hover:bg-brand-hover disabled:opacity-40"
+                              className="inline-flex h-7 items-center gap-1 rounded-md bg-brand px-2.5 text-[11.5px] font-medium text-on-solid hover:bg-brand-hover disabled:opacity-40"
                             >
                               {cookieBusy === `save-${site.key}` ? <Loader2 size={11} className="animate-spin" /> : "保存"}
                             </button>
@@ -1146,7 +1146,7 @@ export function OpsPanel({
                         setAddingRss(false);
                       }
                     }}
-                    className="inline-flex items-center justify-center gap-1 rounded-lg bg-brand px-3.5 py-1.5 text-[12.5px] font-medium text-white transition-colors hover:bg-brand-hover disabled:opacity-40"
+                    className="inline-flex items-center justify-center gap-1 rounded-lg bg-brand px-3.5 py-1.5 text-[12.5px] font-medium text-on-solid transition-colors hover:bg-brand-hover disabled:opacity-40"
                   >
                     {addingRss ? <Loader2 size={13} className="animate-spin" /> : <Plus size={14} />}
                     加入并采集
@@ -1241,7 +1241,7 @@ export function OpsPanel({
                         className={
                           "inline-flex items-center justify-center gap-1 rounded-lg border px-2.5 py-2 text-[12px] font-medium transition-colors " +
                           (editingId === s.id
-                            ? "border-ink-950 bg-ink-950 text-white"
+                            ? "border-ink-950 bg-ink-950 text-on-solid"
                             : "border-ink-200 bg-surface text-ink-700 hover:border-ink-300")
                         }
                       >
@@ -1380,7 +1380,7 @@ export function OpsPanel({
                               className={
                                 "inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[12px] font-medium transition-colors " +
                                 (editingId === s.id
-                                  ? "border-ink-950 bg-ink-950 text-white"
+                                  ? "border-ink-950 bg-ink-950 text-on-solid"
                                   : "border-ink-200 bg-surface text-ink-600 hover:border-ink-300 hover:text-ink-950")
                               }
                               title="编辑名称、RSS 地址、用途频道或 JSON 配置"
@@ -1455,7 +1455,7 @@ export function OpsPanel({
                   onClick={() => setQualityDays(w.d)}
                   className={
                     "rounded px-2.5 py-1 text-[11.5px] font-medium transition-colors " +
-                    (qualityDays === w.d ? "bg-ink-950 text-white" : "text-ink-500 hover:text-ink-950")
+                    (qualityDays === w.d ? "bg-ink-950 text-on-solid" : "text-ink-500 hover:text-ink-950")
                   }
                 >
                   {w.label}
