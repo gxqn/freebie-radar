@@ -35,7 +35,7 @@ class BoundedServer(ThreadingHTTPServer):
 
 def collect():
     # timeout executes INSIDE the container so disconnecting docker exec cannot orphan a collector.
-    cmd=['docker','exec','freebie-radar-radar-1','flock','-n','/data/.collection.lock','timeout','-s','TERM','-k','10','720','node','--no-warnings','src/server/cli.ts','collect']
+    cmd=['docker','exec','freebie-radar-radar-1','flock','-n','/data/.collection.lock','timeout','-s','TERM','-k','10','720','node','--no-warnings','src/server/cli.ts','scheduled-cycle']
     result=subprocess.run(cmd,timeout=750)
     return result.returncode
 

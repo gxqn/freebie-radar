@@ -447,10 +447,13 @@ export function checkPushFilter(
     category?: string | null;
     obtain?: string | null;
     publishedAt?: string | null;
+    expiresAt?: string | null;
   },
   s: PushSettings,
 ): FilterRejectReason | null {
   if (!freshEnoughForPush(item.publishedAt, s.maxAgeHours)) return "stale";
+  if (/(?:已无|已结束|已过期|已失效|活动结束)/u.test(item.title)) return 'stale';
+  if (item.expiresAt && Number.isFinite(Date.parse(item.expiresAt)) && Date.parse(item.expiresAt) <= Date.now()) return 'stale';
   if (!sourceAllowed(item.sourceId, s)) return "source";
   if (!langAllowed(item, s)) return "lang";
   if (!aiAllowed(item, s)) return "ai";
@@ -482,6 +485,7 @@ export function passesPushFilters(
     category?: string | null;
     obtain?: string | null;
     publishedAt?: string | null;
+    expiresAt?: string | null;
   },
   s: PushSettings,
 ): boolean {

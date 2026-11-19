@@ -1,4 +1,4 @@
-import { all, run } from './db.ts';
+import { all, get, run } from './db.ts';
 import { AI_HOURS, AI_BATCH_LIMIT, beijingDay, scheduledAiMode, scheduledAiSlot } from './automation-policy.ts';
 
 /** Atomic persistent reservation; failures and crashes never refund a transport attempt. */
@@ -27,5 +27,6 @@ export function aiAutomationStatus() {
     .map(r => JSON.parse(r.value) as { hour: number; items: number; status: string; at: string });
   return { mode: scheduledAiMode() ? 'scheduled' : 'realtime', timezone: 'Asia/Shanghai', hours: AI_HOURS,
     maxRequestsPerDay: 5, maxItemsPerRequest: AI_BATCH_LIMIT, day, attempts, used: attempts.length,
+    cleanup: (() => { const row = get<{ value: string }>('SELECT value FROM settings WHERE key=?', `automation:cleanup:${day}`); return row ? JSON.parse(row.value) : null; })(),
     manualRequestsIncluded: false, collectionCallsAi: !scheduledAiMode(), pushCallsAi: !scheduledAiMode() };
 }

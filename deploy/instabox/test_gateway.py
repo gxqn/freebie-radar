@@ -30,7 +30,7 @@ class GatewayTests(unittest.TestCase):
         command=run.call_args[0][0]
         self.assertEqual(command[3:6],['flock','-n','/data/.collection.lock'])
         self.assertIn('timeout',command)
-        self.assertEqual(command[-1],'collect', 'scheduled collection must respect enabled source settings')
+        self.assertEqual(command[-1],'scheduled-cycle', 'scheduled collection must include daily cleanup and bounded AI, not enable the internal scheduler')
     def test_failed_slot_is_not_reported_as_success(self):
         import sqlite3,datetime,json
         slot=datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H')

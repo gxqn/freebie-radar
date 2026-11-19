@@ -4,7 +4,8 @@ import { calibrateScoreByObtain, resolveDbMergeKey } from "./enrich/alias.ts";
 import { backfillAi } from "./ai-admin.ts";
 import { runAll, runSource, ensureSources } from "./collectors/index.ts";
 import { lastDigests, runDaily } from "./digest.ts";
-import { getPushSettings, passesPushFilters } from "./push.ts";
+import { getPushSettings, passesPushFilters, flushBatch, queueSize } from "./push.ts";
+import { runDailyCleanup, runScheduledAi } from './automation.ts';
 import { guessObtain } from "./enrich/obtain.ts";
 import { getSourceHints, reconcileSourceCategory, applyManualClassification } from "./source-settings.ts";
 import { categoryForSource } from "../shared/source-classification.ts";
@@ -14,6 +15,25 @@ ensureSources();
 
 async function main() {
   switch (cmd) {
+    case 'scheduled-cycle': {
+      // External hourly job only; never enables the original always-on scheduler.
+      try { console.log('[maintenance] cleanup', JSON.stringify(runDailyCleanup())); }
+      catch (err) { console.error('[maintenance] cleanup failed:', err instanceof Error ? err.message : String(err)); process.exitCode = 1; }
+      const results = await runAll();
+      const failed = results.filter(r => r.status === 'failed').length;
+      console.log(`[collect] done: ${results.length} sources, ${failed} failed, ${results.reduce((n,r) => n+r.inserted,0)} inserted`);
+      if (failed && failed === results.length) process.exitCode = 1;
+      // Drain only this process's new queue before exit. Quiet hours/hourly cap still apply.
+      for (let i=0; i<25 && queueSize()>0; i++) { if (!(await flushBatch(false))) break; }
+      try { console.log('[maintenance] scheduled-ai', JSON.stringify(await runScheduledAi())); }
+      catch (err) { console.error('[maintenance] AI failed:', err instanceof Error ? err.message : String(err)); }
+      break;
+    }
+    case 'maintenance': {
+      console.log('[maintenance] cleanup', JSON.stringify(runDailyCleanup()));
+      console.log('[maintenance] scheduled-ai', JSON.stringify(await runScheduledAi()));
+      break;
+    }
     case "collect": {
       if (args.length) {
         for (const id of args) await runSource(id);
@@ -213,7 +233,7 @@ summary: e.summary ?? "",
     }
     default:
       console.log(
-        "usage: cli.ts <collect [sourceId...] | sources | enable <id...> | disable <id...> | config <id> <json> | reclassify | ai-review [limit] | obtain [--all] | diagnose | stats>",
+        "usage: cli.ts <scheduled-cycle | maintenance | collect [sourceId...] | sources | enable <id...> | disable <id...> | config <id> <json> | reclassify | ai-review [limit] | obtain [--all] | diagnose | stats>",
       );
   }
 }
