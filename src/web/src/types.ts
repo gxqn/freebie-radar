@@ -323,6 +323,7 @@ export type AiTelemetry = {
 };
 
 export type AiPayload = {
+  automation?: { mode: 'scheduled' | 'realtime'; timezone: string; hours: number[]; maxRequestsPerDay: number; maxItemsPerRequest: number; used: number; day: string };
   settings: AiSettings;
   stats: AiStats;
   feedback?: {

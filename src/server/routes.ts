@@ -1,4 +1,5 @@
 import type { Hono } from "hono";
+import { aiAutomationStatus } from './ai-budget.ts';
 import { all, get, run, tx, dbRevision, type SqlValue } from "./db.ts";
 import { registerSecurity, registerPublicCache, limitUserAction, adminHostAllowed } from "./security.ts";
 import { reconcileSourceCategory, getSourceHints, getManualClassification } from "./source-settings.ts";
@@ -1380,6 +1381,7 @@ const fetchLimit = Math.min(Math.max(offset + limit * 3, 240), 600);
         reviewBeforePush: pushS.pushTiming === "wait_ai",
         syncPrePushLimit: pushS.syncPrePushLimit,
       },
+      automation: aiAutomationStatus(),
       stats: aiStats(),
       feedback: feedbackStats(aiS.feedbackLimit),
     });

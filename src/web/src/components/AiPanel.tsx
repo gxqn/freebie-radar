@@ -384,7 +384,7 @@ export function AiPanel({
             <p className="mt-0.5 text-[12px] text-ink-500">
               {s.baseUrl ? s.model + " @ " + s.baseUrl.replace(/^https?:\/\//, "") : "还没有配置端点"}
               {s.hasKey ? " · Key " + s.keyHint : " · 未设置 Key"}
-              {" · 推送前等待/极速抢码时机请到「推送规则」设置"}
+              {data?.automation?.mode === 'scheduled' ? ' · 定时批审，采集和推送不等待 AI' : ' · 推送前等待/极速抢码时机请到「推送规则」设置'}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -401,6 +401,13 @@ export function AiPanel({
           </div>
         </div>
 
+        {data?.automation?.mode === 'scheduled' && (
+          <div className="rounded-lg border border-brand-border bg-brand-subtle px-3.5 py-3 text-[12px] leading-relaxed text-ink-800">
+            <strong>自动审核：北京时间 {data.automation.hours.map(h => `${String(h).padStart(2, '0')}:00`).join(' / ')}</strong>
+            <p>每天最多 {data.automation.maxRequestsPerDay} 次请求，每次最多 {data.automation.maxItemsPerRequest} 条；今日已使用 {data.automation.used} 次（失败也计入，不自动重试）。受设备休眠/冷却影响可能跳过，不在其它时段补打。</p>
+            <p>普通采集、TG 推送和自动语义去重不调用模型。下方测试、手动补审和手动去重会额外调用模型，不计入自动 5 次预算。</p>
+          </div>
+        )}
         {/* 补审 / 重审工具条 */}
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-ink-200 bg-surface-hover px-3.5 py-2.5">
           <div className="text-[12px] text-ink-700">
@@ -972,11 +979,11 @@ export function AiPanel({
         </div>
 
         <div className="rounded-lg border border-ink-200 bg-surface-hover px-3.5 py-2 text-[11.5px] leading-relaxed text-ink-600">
-          当前分波节奏：每次 HTTP 请求打包 <span className="font-mono font-medium text-ink-900">{form.batchSize}</span> 条 ×{" "}
+          {data?.automation?.mode === 'scheduled' ? '以下分波参数仅用于手动操作；自动任务固定每次最多20条、单请求、零重试。' : <>当前分波节奏：每次 HTTP 请求打包 <span className="font-mono font-medium text-ink-900">{form.batchSize}</span> 条 ×{" "}
           <span className="font-mono font-medium text-ink-900">{form.concurrency}</span> 并发 = 每波{" "}
           <span className="font-mono font-medium text-ink-900">{form.batchSize * form.concurrency}</span> 条 · 采集后先同步审核前{" "}
           <span className="font-mono font-medium text-ink-900">{s.syncPrePushLimit ?? 20}</span> 条再推（可在「推送规则」调整），超出部分进异步队列每波最多{" "}
-          <span className="font-mono font-medium text-ink-900">{Math.min(Math.max(form.batchSize * form.concurrency, 12), 48)}</span> 条 · 上方「单次调用上限」仅限制直接批调用，「历史补审 50/200/500」则由右侧下拉单独控制。
+          <span className="font-mono font-medium text-ink-900">{Math.min(Math.max(form.batchSize * form.concurrency, 12), 48)}</span> 条 · 上方「单次调用上限」仅限制直接批调用，「历史补审 50/200/500」则由右侧下拉单独控制。</>}
         </div>
 
         {/* 偏好自适应 */}

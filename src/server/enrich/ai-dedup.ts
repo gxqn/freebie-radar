@@ -1,4 +1,5 @@
 import { all, get, run, tx } from "../db.ts";
+import { scheduledAiMode, type AiExecutionOrigin } from '../automation-policy.ts';
 import { aiReady, getAiSettings, type AiSettings } from "./ai-settings.ts";
 
 export type DedupCandidate = {
@@ -96,8 +97,10 @@ export async function findSemanticDuplicatesWithAi(
   anchors: DedupCandidate[],
   settings?: AiSettings,
   fetchImpl: typeof fetch = fetch,
+  origin: AiExecutionOrigin = 'automatic',
 ): Promise<Map<number, SemanticDupMatch>> {
   const out = new Map<number, SemanticDupMatch>();
+  if (scheduledAiMode() && origin !== 'manual') return out;
   const s = settings ?? getAiSettings();
   if (!candidates.length) return out;
   if (!anchors.length && candidates.length < 2) return out;
@@ -416,7 +419,7 @@ export async function runAiDedupBackfill(limit = 80): Promise<{
     }
     for (let i = 0; i < pending.length; i += 12) {
       const chunk = pending.slice(i, i + 12);
-      const matches = await findSemanticDuplicatesWithAi(chunk, anchors, s);
+      const matches = await findSemanticDuplicatesWithAi(chunk, anchors, s, fetch, 'manual');
       for (const [idx, m] of matches) {
         const cand = chunk[idx];
         if (!cand) continue;

@@ -1,4 +1,6 @@
 import { config } from "../config.ts";
+import { scheduledAiMode, type AiExecutionOrigin } from '../automation-policy.ts';
+import { claimAutomaticAiAttempt, finishAutomaticAiAttempt } from '../ai-budget.ts';
 import { all, get, run } from "../db.ts";
 import type { RawItem } from "../collectors/types.ts";
 import { isNoiseTitle } from "./noise.ts";
@@ -307,7 +309,12 @@ type CallResult = { map: Map<number, AiVerdict>; ttfbMs: number };
 async function callOnce(
   payload: { index: number; title: string; summary: string }[],
   s: AiSettings,
+  origin: AiExecutionOrigin,
 ): Promise<CallResult> {
+  if (scheduledAiMode() && origin === 'automatic') throw new Error('自动逐条 AI 已关闭');
+  const permit = origin === 'scheduled' ? claimAutomaticAiAttempt(payload.length) : null;
+  if (origin === 'scheduled' && !permit) throw new Error('不在自动 AI 时段或本时段预算已使用');
+  let completed = false;
   const endpoint = s.baseUrl.replace(/\/+$/, "") + "/chat/completions";
   const timeoutMs = s.timeoutSec * 1000;
   const ac = new AbortController();
@@ -343,9 +350,11 @@ async function callOnce(
     for (const v of arr) {
       if (typeof v?.index === "number") map.set(v.index, v);
     }
+    completed = true;
     return { map, ttfbMs: ttfb };
   } finally {
     clearTimeout(timer);
+    if (permit) finishAutomaticAiAttempt(permit, completed ? 'succeeded' : 'failed');
   }
 }
 
@@ -371,9 +380,12 @@ function aiSummaryExcerpt(it: { summary?: string | null; content?: string | null
 export async function reviewItems(
   items: RawItem[],
   settings?: AiSettings,
-  hooks?: { onBatch?: (ev: ReviewBatchEvent) => void },
+  hooks?: { onBatch?: (ev: ReviewBatchEvent) => void; origin?: AiExecutionOrigin },
 ): Promise<Map<number, AiVerdict> | null> {
-  const s = settings ?? getAiSettings();
+  const origin = hooks?.origin ?? 'automatic';
+  if (scheduledAiMode() && origin === 'automatic') return null;
+  const configured = settings ?? getAiSettings();
+  const s = origin === 'scheduled' ? { ...configured, maxItems: 20, batchSize: 20, concurrency: 1 } : configured;
   if (!aiReady(s) || !items.length) return null;
 
   const total = Math.min(items.length, s.maxItems);
@@ -397,9 +409,10 @@ export async function reviewItems(
 
   const runJob = async (job: Job): Promise<CallResult | null> => {
     let lastErr: string | undefined;
-    for (let attempt = 0; attempt < 2; attempt += 1) {
+    const maxAttempts = origin === 'scheduled' ? 1 : 2;
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
       try {
-        const res = await callOnce(job.payload, s);
+        const res = await callOnce(job.payload, s, origin);
         hooks?.onBatch?.({
           start: job.start,
           count: job.chunk.length,
@@ -411,7 +424,7 @@ export async function reviewItems(
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         lastErr = msg;
-        if (attempt === 0) {
+        if (attempt + 1 < maxAttempts) {
           console.log(`[ai] 重试 n=${job.payload.length} idx=${job.start}：${msg.slice(0, 60)}`);
           continue;
         }
@@ -476,6 +489,7 @@ export async function testAiConnection(draft?: Partial<AiSettings>): Promise<{
   });
   try {
     const map = await reviewItems(samples, s, {
+      origin: 'manual',
       onBatch: (ev) => {
         let kept = 0;
         let rejected = 0;

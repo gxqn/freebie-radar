@@ -1,3 +1,4 @@
+import { automaticAiDuringCollection } from '../automation-policy.ts';
 import { getAiSettings, reviewItems, type AiVerdict } from "./ai-settings.ts";
 import { dedupeKeptItemsWithAi } from "./ai-dedup.ts";
 import { demoteEditorialGoods, demoteOfflineCategory, enforceFreebieEvidence, FREEBIE_ONLY_SOURCES, isCategory, resolveKind, type ContentKind } from "./index.ts";
@@ -51,7 +52,7 @@ export function setPostReviewHandler(handler: PostReviewHandler | null): void {
 
 /** 采集侧调用：把新条目排进队列，立刻返回。 */
 export function enqueueForAi(items: AiQueueJob[]): void {
-  if (!items.length) return;
+  if (!automaticAiDuringCollection() || !items.length) return;
   const existingIds = new Set(queue.map((q) => q.itemId));
   const fresh = items.filter((it) => !existingIds.has(it.itemId));
   if (!fresh.length) return;
@@ -193,7 +194,7 @@ codes: parseCodes(cur.codes),
 /** 推送前同步审核：把本轮待推送新条目先送模型判定并写库，返回各 itemId 的最新结论。 */
 export async function reviewFreshNow(items: AiQueueJob[]): Promise<Map<number, AppliedVerdict>> {
   const out = new Map<number, AppliedVerdict>();
-  if (!items.length) return out;
+  if (!automaticAiDuringCollection() || !items.length) return out;
   const s = getAiSettings();
   const raws = items.map((j) => ({
     externalId: String(j.itemId),

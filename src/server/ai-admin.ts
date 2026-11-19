@@ -133,11 +133,13 @@ export type BackfillMode = "pending" | "recent" | "rejected";
 export async function backfillAi(
   limit = 200,
   mode: BackfillMode = "pending",
+  options: { scheduled?: boolean } = {},
 ): Promise<{ reviewed: number; rejected: number; skippedBlocked: number; scanned: number; mode: BackfillMode; error?: string }> {
-  const s = getAiSettings();
+  const configured = getAiSettings();
+  const s = options.scheduled ? { ...configured, maxItems: 20, batchSize: 20, concurrency: 1 } : configured;
   if (!aiReady(s)) return { reviewed: 0, rejected: 0, skippedBlocked: 0, scanned: 0, mode, error: "AI 未启用或未配置" };
 
-  const safeLimit = Math.min(Math.max(Math.round(limit), 1), 2000);
+  const safeLimit = Math.min(Math.max(Math.round(limit), 1), options.scheduled ? 20 : 2000);
   const scanLimit = Math.min(safeLimit * 4, 4000);
   const whereExtra =
     mode === "rejected"
@@ -203,6 +205,7 @@ let rejected = 0;
       let map;
       try {
         map = await reviewItems(raws as never, { ...s, maxItems: chunk.length }, {
+          origin: options.scheduled ? 'scheduled' : 'manual',
           onBatch: (ev) => {
             if (ev.error) lastError = ev.error;
             let bKept = 0;
@@ -323,7 +326,7 @@ if (!v.keep) rejected += 1;
   }
 
 // 补审/重审通过后顺带走一次 AI 语义去重聚类，避免历史库继续留着同活动多条
-  if (keptIds.length && getAiSettings().aiDedupEnabled) {
+  if (!options.scheduled && keptIds.length && getAiSettings().aiDedupEnabled) {
     try {
       await dedupeKeptItemsWithAi(keptIds);
     } catch (err) {
@@ -331,7 +334,7 @@ if (!v.keep) rejected += 1;
     }
   }
 
-  return { reviewed, rejected, skippedBlocked, scanned: rows.length, mode };
+  return { reviewed, rejected, skippedBlocked, scanned: rows.length, mode, ...(reviewed === 0 && lastError ? { error: lastError } : {}) };
 }
 
 /**
